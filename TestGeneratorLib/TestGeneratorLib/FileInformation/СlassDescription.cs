@@ -6,7 +6,17 @@ using System.Threading.Tasks;
 
 namespace TestGeneratorLib.FileInformation
 {
-    class СlassDescription
+    class ClassDescription
     {
+        public List<MethodDescription> Methods { get; private set; }
+        public string ClassName { get; private set; }
+       
+
+        public ClassDescription (List<MethodDescription> methods, string className)
+        {
+            this.Methods = methods;
+            this.ClassName = className;
+        }
+
     }
 }

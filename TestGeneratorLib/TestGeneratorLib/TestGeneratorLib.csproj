@@ -75,7 +75,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="SourceCodeAnalyzer.cs" />
+    <Compile Include="TestGenerator.cs" />
+    <Compile Include="FileInformation\FileDescription.cs" />
+    <Compile Include="FileInformation\MethodDescription.cs" />
+    <Compile Include="FileInformation\СlassDescription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
