@@ -9,9 +9,9 @@ namespace TestGeneratorLib.FileInformation
     class FileDescription
     {
 
-        public List<ClassDescription> Classes { get; private set; }
+        public List<TestClassDescription> Classes { get; private set; }
 
-        public FileDescription(List<ClassDescription> classes)
+        public FileDescription(List<TestClassDescription> classes)
         {
             Classes = classes;
         }

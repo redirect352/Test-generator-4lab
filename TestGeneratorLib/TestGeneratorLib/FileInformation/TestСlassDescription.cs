@@ -6,16 +6,17 @@ using System.Threading.Tasks;
 
 namespace TestGeneratorLib.FileInformation
 {
-    class ClassDescription
+    class TestClassDescription
     {
         public List<MethodDescription> Methods { get; private set; }
         public string ClassName { get; private set; }
-       
+        public string TestedNamespace { get; private set; }
 
-        public ClassDescription (List<MethodDescription> methods, string className)
+        public TestClassDescription (List<MethodDescription> methods, string className,string @namespace)
         {
-            this.Methods = methods;
-            this.ClassName = className;
+            Methods = methods;
+            ClassName = className;
+            TestedNamespace = @namespace;
         }
 
     }
