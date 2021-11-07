@@ -28,7 +28,8 @@ namespace TestGeneratorLib
                 var compilationUnit = SyntaxFactory.CompilationUnit()
                    .AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")))
                    .AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("NUnit.Framework")))
-                   .AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Moq")))
+                   .AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Collections.Generic")))
+                     .AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Moq")))
                    .AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(classDescription.TestedNamespace)))
                    .AddMembers(namespaceDeclaration);
                 result.Add(classDescription.ClassName, compilationUnit.NormalizeWhitespace().ToFullString());
@@ -53,12 +54,32 @@ namespace TestGeneratorLib
            
             string actualName = classDescription.ClassName.Remove(classDescription.ClassName.Length - 4);
 
-
-            methods.Add(testMethodGenerator.GenerateSetupMethod(GetClassVarName(actualName),actualName));
+            MethodDescription mainConstructor = TestMethodsGenerator.GetMainConstructor(classDescription.Methods);
+            methods.Add(testMethodGenerator.GenerateSetupMethod(actualName, mainConstructor));
             foreach (var methodInfo in classDescription.Methods)
             {
-                methods.Add(testMethodGenerator.GenerateMethodDeclaration(methodInfo,TestMethodAttribute,
-                    GetClassVarName(actualName)));
+                if (!methodInfo.IsConstructor)
+                {
+                    methods.Add(testMethodGenerator.GenerateMethodDeclaration(methodInfo, TestMethodAttribute,
+                   GetClassVarName(actualName)));
+                }
+               
+            }
+
+            List<FieldDeclarationSyntax> fields = new List<FieldDeclarationSyntax>();
+            fields.Add(GeneratePrivateField(GetClassVarName(actualName), actualName));
+
+            if (mainConstructor!=null)
+            {
+                foreach (string param in mainConstructor.Parameters.Keys)
+                {
+                    if (mainConstructor.Parameters[param].First() == 'I')
+                    {
+                        fields.Add(GeneratePrivateField(GetDependencyName(mainConstructor.Parameters[param]), $"Mock<{mainConstructor.Parameters[param]}>"));
+
+                    }
+
+                }
             }
 
 
@@ -66,7 +87,7 @@ namespace TestGeneratorLib
             var list = SyntaxFactory.AttributeList(attributes);
             var classDeclaration = SyntaxFactory.ClassDeclaration(classDescription.ClassName)
                                                 .AddAttributeLists(list)
-                                                .AddMembers(GeneratePrivateField(GetClassVarName(actualName), actualName))
+                                                .AddMembers(fields.ToArray())
                                                 .AddMembers(methods.ToArray());
                                                 
             return classDeclaration;
@@ -78,6 +99,14 @@ namespace TestGeneratorLib
             return "_" + className[0].ToString().ToLower() + className.Remove(0, 1);
         }
 
+
+        internal static string GetDependencyName(string interfaceName)
+        {
+            string name = ("_" + interfaceName.First().ToString().ToLower() + interfaceName.Remove(0, 1));
+            name = name = name.Replace('<', '_');
+            name = name.Replace('>', '_');
+            return name;
+        }
 
 
         private static FieldDeclarationSyntax GeneratePrivateField(string varName, string typeName)

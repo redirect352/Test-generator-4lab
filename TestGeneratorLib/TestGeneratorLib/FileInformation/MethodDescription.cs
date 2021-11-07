@@ -11,6 +11,7 @@ namespace TestGeneratorLib.FileInformation
         public string Name { get; private set; }
         public string ReturnType { get; private set; }
         public Dictionary<string, string> Parameters { get; private set; }
+        public bool IsConstructor { get; set; } = false;
 
         public MethodDescription(Dictionary<string, string> parameters, string name, string returnType)
         {

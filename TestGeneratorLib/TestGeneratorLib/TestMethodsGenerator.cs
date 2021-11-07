@@ -14,10 +14,39 @@ namespace TestGeneratorLib
     class TestMethodsGenerator
     {
 
-        internal MethodDeclarationSyntax GenerateSetupMethod( string ClassVariableName, string @class)
+        internal MethodDeclarationSyntax GenerateSetupMethod( string @class,MethodDescription mainConstructor)
         {
             List<StatementSyntax> failTest = new List<StatementSyntax>();
-            failTest.Add(SyntaxFactory.ParseStatement(string.Format("{0} = new {1}();",ClassVariableName,@class)));
+            string params1 = "";
+            if (mainConstructor != null)
+            {
+                foreach (string param in mainConstructor.Parameters.Keys)
+                {
+                    if (mainConstructor.Parameters[param].First() != 'I')
+                    {
+                        failTest.Add(SyntaxFactory.ParseStatement(string.Format("{0} {1} = default({2});", mainConstructor.Parameters[param], param, mainConstructor.Parameters[param])));
+
+                        params1 += param + ",";
+                    }
+                    else
+                    {
+                        string name = TestGenerator.GetDependencyName(mainConstructor.Parameters[param]);
+                        failTest.Add(SyntaxFactory.ParseStatement(string.Format("{0} = new {1}();", name, $"Mock<{mainConstructor.Parameters[param]}>")));
+                        params1 += name + ".Object,";
+
+                    }
+
+                }
+                if (params1 != "")
+                {
+                    params1 =  params1.Remove(params1.Length-1);
+                }
+                
+            }
+
+            failTest.Add(SyntaxFactory.ParseStatement(string.Format("{0} = new {1}({2});", TestGenerator.GetClassVarName(@class), @class,params1)));
+
+
 
             return SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "SetUp")
                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
@@ -27,7 +56,7 @@ namespace TestGeneratorLib
 
 
 
-            internal MethodDeclarationSyntax GenerateMethodDeclaration(MethodDescription methodDescription, AttributeSyntax TestMethodAttribute, string ClassVariableName)
+        internal MethodDeclarationSyntax GenerateMethodDeclaration(MethodDescription methodDescription, AttributeSyntax TestMethodAttribute, string ClassVariableName)
         {
             List<StatementSyntax> failTest = new List<StatementSyntax>();
 
@@ -58,16 +87,10 @@ namespace TestGeneratorLib
             List<StatementSyntax> result = new List<StatementSyntax>();
             foreach (string param in parameters.Keys)
             {
-                if (param.First() != 'I')
+                if (parameters[param].First() != 'I')
                 {
                      result.Add(SyntaxFactory.ParseStatement(string.Format("{0} {1} = default({2});" ,parameters[param], param,parameters[param] )));
                 }
-                else
-                {
-
-                }
-
-
             }
             return result;
 
@@ -84,7 +107,15 @@ namespace TestGeneratorLib
                 {
                     params1 += ",";
                 }
-                params1 += p;
+                if (description.Parameters[p].First() != 'I')
+                {
+                    params1 += p;
+                }
+                else
+                {
+                    params1 += TestGenerator.GetDependencyName(description.Parameters[p]);
+                }
+            
             }
 
             if (description.ReturnType != "void")
@@ -113,6 +144,24 @@ namespace TestGeneratorLib
         }
 
 
+        internal static MethodDescription GetMainConstructor(List<MethodDescription> methods)
+        {
+            MethodDescription mainConstructor = null;
+
+            foreach (MethodDescription methodDescription in methods.Where((MethodDescription m) => (m.IsConstructor)))
+            {
+                if (mainConstructor == null)
+                {
+                    mainConstructor = methodDescription;
+                }
+                else if (mainConstructor.Parameters.Count < methodDescription.Parameters.Count)
+                {
+                    mainConstructor = methodDescription;
+                }
+
+            }
+            return mainConstructor;
+        }
 
     }
 }

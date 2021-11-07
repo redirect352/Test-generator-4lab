@@ -42,6 +42,17 @@ namespace TestGeneratorLib
                 }
                
             }
+            foreach (var constructor in classDeclaration.DescendantNodes().OfType<ConstructorDeclarationSyntax>())
+            {
+                if (constructor.Modifiers.Any((modifier) => modifier.IsKind(SyntaxKind.PublicKeyword)))
+                {
+                    methods.Add(GetMethodDescription(constructor, classDeclaration.Identifier.ValueText));
+                }
+
+
+            }
+
+
            
             return new TestClassDescription(methods, classDeclaration.Identifier.ValueText + "Test", name);
 
@@ -58,6 +69,19 @@ namespace TestGeneratorLib
             return new MethodDescription(parameters, method.Identifier.ValueText, method.ReturnType.ToString());
         }
 
+        private static MethodDescription GetMethodDescription(ConstructorDeclarationSyntax constructor, string returnType)
+        {
+
+            var parameters = new Dictionary<string, string>();
+            foreach (var parameter in constructor.ParameterList.Parameters)
+            {
+                parameters.Add(parameter.Identifier.Text, parameter.Type.ToString());
+            }
+
+            var res = new MethodDescription(parameters, constructor.Identifier.ValueText, returnType);
+            res.IsConstructor = true;
+            return res;
+        }
 
 
     }

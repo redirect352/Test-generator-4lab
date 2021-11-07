@@ -8,14 +8,24 @@ namespace TestGeneratorApp.TestData
 {
     class Class1
     {
-
-        public int MyFirstMethod(int a, int b)
+        public Class1(int a, int b)
         {
 
-            return a * b;
+
+        }
+        public Class1(int a, int b,int c, ICollection<int> vs)
+        {
+
+
         }
 
-        public void MySecondMethod(int a, int b)
+        public int MyFirstMethod( int b, ICollection<int> vs)
+        {
+
+            return b * b;
+        }
+
+        public void MySecondMethod(int a, int b, int c)
         {
             a = a + b;
         }
@@ -23,7 +33,7 @@ namespace TestGeneratorApp.TestData
         public double MythirdMethod(int a, int b)
         {
             a++;
-            return (double)a / b;
+            return (double)a / b-b;
         }
 
 
