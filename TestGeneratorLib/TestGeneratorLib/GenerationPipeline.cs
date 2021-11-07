@@ -5,11 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading.Tasks.Dataflow;
-using TestGeneratorLib;
 
-namespace TestGeneratorApp
+namespace TestGeneratorLib
 {
-    class GenerationPipeline
+   public class GenerationPipeline
     {
         public Task GenerateTests(string sourcePath, string[] fileNames, string destinationPath, int maxTasksCount)
         {
